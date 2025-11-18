@@ -25,22 +25,15 @@ Para executar este projeto, você precisará ter instalado:
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/ifal-eventos.git
-cd ifal-eventos
+https://github.com/rafaelbarross/ifal-eventos.git
 ```
 
 ### 2. Crie e ative o ambiente virtual
 
 **Windows:**
-```powershell
-python -m venv .venv
-.venv\Scripts\activate
-```
 
-**Linux/Mac:**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
+```
+.venv/Scripts/Activate.ps1
 ```
 
 ### 3. Instale as dependências
@@ -145,12 +138,14 @@ pip freeze > requirements.txt
 ## Solução de Problemas
 
 ### Erro: "Event loop is closed"
+
 - Certifique-se de que está usando a função `executar_async()` para operações assíncronas
 
 ### Erro: "Prisma Client not found"
+
 - Execute `prisma generate` novamente
 
 ### Erro ao importar módulos
+
 - Verifique se o ambiente virtual está ativado
 - Reinstale as dependências: `pip install -r requirements.txt`
-
