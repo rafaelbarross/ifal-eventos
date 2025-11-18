@@ -1,0 +1,49 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:evento.db"
+}
+
+// generator
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+}
+
+model Evento {
+  id          Int            @id @default(autoincrement())
+  nome        String
+  descricao   String
+  data        DateTime
+  horario     String
+  local       String
+  vagas       Int
+  tipo        String         // Palestra, Workshop, SEMIC
+  status      String         // Aberto, Encerrado, Cancelado
+  inscricoes  Inscricao[]
+  criado_em   DateTime       @default(now())
+}
+
+model Participante {
+  id          Int            @id @default(autoincrement())
+  nome        String
+  cpf         String         @unique
+  email       String
+  curso       String
+  turma       String
+  inscricoes  Inscricao[]
+  criado_em   DateTime       @default(now())
+}
+
+model Inscricao {
+  id              Int            @id @default(autoincrement())
+  evento_id       Int
+  participante_id Int
+  presente        Boolean        @default(false)
+  certificado     Boolean        @default(false)
+  data_inscricao  DateTime       @default(now())
+  
+  evento          Evento         @relation(fields: [evento_id], references: [id])
+  participante    Participante   @relation(fields: [participante_id], references: [id])
+  
+  @@unique([evento_id, participante_id])
+}
