@@ -45,36 +45,38 @@ pip install -r requirements.txt
 ### 4. Configure o banco de dados
 
 ```bash
-# Gerar o Prisma Client
-prisma generate
-
-# Criar as tabelas no banco de dados
+# Criar as tabelas no banco de dados e Gerar o Prisma Client
 prisma db push
 ```
 
 ## Estrutura do Projeto
 
 ```
-ifal-eventos/
-├── prisma/
-│   └── schema.prisma          # Schema do banco de dados
-├── src/
-│   ├── main.py                # Arquivo principal da aplicação
-│   ├── telas/                 # Interfaces gráficas
-│   │   ├── eventos.py
-│   │   ├── participantes.py
-│   │   ├── inscricoes.py
-│   │   └── relatorios.py
-│   └── utils/                 # Utilitários
-│       └── icons.py
-├── modules/
-│   ├── evento/
-│   │   └── evento.py          # Manager de eventos
-│   └── participante/
-│       └── participante.py    # Manager de participantes
-├── .venv/                     # Ambiente virtual (não versionado)
-├── requirements.txt           # Dependências do projeto
-└── README.md                  # Este arquivo
+├── 📁 certificados
+├── 📁 modules
+│   ├── 📁 evento
+│   │   └── 🐍 evento.py
+│   ├── 📁 inscricao
+│   │   └── 🐍 inscricao.py
+│   └── 📁 participante
+│       └── 🐍 participante.py
+├── 📁 prisma
+│   ├── 📄 evento.db
+│   └── 📄 schema.prisma
+├── 📁 relatorios
+├── 📁 src
+│   ├── 📁 telas
+│   │   ├── 🐍 __init__.py
+│   │   ├── 🐍 eventos.py
+│   │   ├── 🐍 inscricoes.py
+│   │   ├── 🐍 participantes.py
+│   │   └── 🐍 relatorios.py
+│   ├── 📁 utils
+│   │   ├── 🐍 __init__.py
+│   │   └── 🐍 icons.py
+│   └── 🐍 main.py
+├── 📝 README.md
+└── 📄 requirements.txt
 ```
 
 ## Execução
@@ -106,7 +108,7 @@ prisma studio
 prisma db push
 
 # Gerar novamente o cliente Prisma
-prisma generate
+prisma generate --watch
 ```
 
 ## Tecnologias Utilizadas
