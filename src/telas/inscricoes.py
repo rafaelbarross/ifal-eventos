@@ -1,12 +1,19 @@
 import customtkinter as ctk
 from tkinter import messagebox
+from modules.inscricao.inscricao import InscricaoService
+import asyncio
+from datetime import datetime
 
 class TelaInscricoes:
     def __init__(self, parent, app):
+        self.inscricao_service = InscricaoService()
+
         self.parent = parent
         self.app = app
         self.frame = None
         self.evento_selecionado = None
+        self.entry_busca_evento = None
+        self.eventos_disponiveis = []
         
     def criar(self):
         self.frame = ctk.CTkFrame(self.parent, corner_radius=0, fg_color="white")
@@ -21,6 +28,7 @@ class TelaInscricoes:
             font=ctk.CTkFont(size=28, weight="bold"),
             text_color="#1F2937"
         )
+
         titulo.grid(row=0, column=0, columnspan=2, sticky="w", padx=30, pady=(20, 5))
         
         # Subtítulo
@@ -57,24 +65,24 @@ class TelaInscricoes:
         frame_busca_evento.pack(padx=20, pady=(0, 10), fill="x")
         
         ctk.CTkLabel(frame_busca_evento, text="🔍", font=ctk.CTkFont(size=14)).pack(side="left", padx=(8, 0))
-        entry_busca_evento = ctk.CTkEntry(
+        self.entry_busca_evento = ctk.CTkEntry(
             frame_busca_evento,
             placeholder_text="Buscar evento por nome...",
             height=35,
             border_width=0,
             fg_color="white"
         )
-        entry_busca_evento.pack(side="left", fill="x", expand=True, padx=(0, 8))
+        self.entry_busca_evento.pack(side="left", fill="x", expand=True, padx=(0, 8))
         
         # Scrollable frame para eventos
         self.scroll_eventos = ctk.CTkScrollableFrame(frame_eventos, fg_color="transparent")
         self.scroll_eventos.pack(fill="both", expand=True, padx=20, pady=(0, 20))
         
         # Exemplos de eventos
-        self.adicionar_evento_card("Palestra de Inteligência Artificial", "15 de Ago, 14:00", "Aberto", "#10B981")
-        self.adicionar_evento_card("Workshop de Design Thinking", "22 de Ago, 09:00", "Lotado", "#EF4444")
-        self.adicionar_evento_card("Hackathon de Inovação", "05 de Set, 18:00", "Últimas Vagas", "#F59E0B")
-        self.adicionar_evento_card("Feira de Carreiras 2024", "12 de Out, 10:00", "Finalizado", "#6B7280")
+        #self.adicionar_evento_card("Palestra de Inteligência Artificial", "15 de Ago, 14:00", "Aberto", "#10B981")
+        #self.adicionar_evento_card("Workshop de Design Thinking", "22 de Ago, 09:00", "Lotado", "#EF4444")
+        #self.adicionar_evento_card("Hackathon de Inovação", "05 de Set, 18:00", "Últimas Vagas", "#F59E0B")
+        #self.adicionar_evento_card("Feira de Carreiras 2024", "12 de Out, 10:00", "Finalizado", "#6B7280")
         
         # --- COLUNA DIREITA: Detalhes do Evento ---
         frame_detalhes = ctk.CTkFrame(container, fg_color="#F9FAFB", corner_radius=10)
@@ -104,6 +112,7 @@ class TelaInscricoes:
             hover_color="#F0FDF4",
             font=ctk.CTkFont(size=12)
         )
+
         btn_editar_evento.pack(side="right")
         
         # Info do evento
@@ -197,6 +206,10 @@ class TelaInscricoes:
             fg_color="white"
         )
         self.entry_busca_participante.pack(side="left", fill="x", expand=True, padx=8)
+
+        self.entry_busca_evento.bind('<KeyRelease>', self.filtrar_eventos)
+        
+        asyncio.run(self.carregar_eventos())
         
         btn_inscrever = ctk.CTkButton(
             frame_busca_participante,
@@ -205,7 +218,8 @@ class TelaInscricoes:
             height=38,
             fg_color="#22C55E",
             hover_color="#16A34A",
-            font=ctk.CTkFont(size=13, weight="bold")
+            font=ctk.CTkFont(size=13, weight="bold"),
+            command=self.cadastrar_inscricao
         )
         btn_inscrever.pack(side="right", padx=(0, 8))
         
@@ -251,7 +265,35 @@ class TelaInscricoes:
         
         return self.frame
     
-    def adicionar_evento_card(self, nome, data, status, cor_status):
+    def exibir_eventos(self, eventos):
+        for widget in self.scroll_eventos.winfo_children():
+            widget.destroy()
+        
+        for evento in eventos:
+            self.adicionar_evento_card(
+                evento.id,
+                evento.nome,
+                evento.data.strftime("%d/%m/%Y %H:%M"),
+                evento.status,
+                "#10B981" if evento.status == "aberto" else "#EF4444"
+            )
+    
+    async def carregar_eventos(self):
+        eventos = await self.inscricao_service.get_evento("")
+        self.eventos_disponiveis = eventos
+        self.exibir_eventos(eventos)
+
+    def filtrar_eventos(self, event=None):
+        termo_busca = self.entry_busca_evento.get().lower()
+
+        eventos_filtrados = [
+            e for e in self.eventos_disponiveis
+               if termo_busca in e.nome.lower()
+        ]
+
+        self.exibir_eventos(eventos_filtrados)
+
+    def adicionar_evento_card(self, evento_id, nome, data, status, cor_status):
         frame_card = ctk.CTkFrame(self.scroll_eventos, fg_color="white", corner_radius=8, border_width=1, border_color="#E5E7EB")
         frame_card.pack(fill="x", pady=5)
         
@@ -296,8 +338,17 @@ class TelaInscricoes:
             fg_color=f"{cor_status}20",
             corner_radius=4
         )
-        badge.pack(padx=12, pady=(0, 12), anchor="w")
-    
+        badge.pack(padx=12, pady=(0, 12), anchor="w"),
+
+    def selecionar_evento(event):
+        self.evento_selecionado = evento_id
+        self.label_evento_titulo.configure(text=nome)
+        self.label_evento_info.configure(text=data)
+
+        frame_card.bind("<Button-1>", selecionar_evento)
+        for child in frame_card.winfo_children():
+           child.bind("<Button-1>", selecionar_evento)
+
     def adicionar_inscrito_lista(self, nome, matricula, data):
         frame_inscrito = ctk.CTkFrame(self.scroll_inscritos, fg_color="white", height=50)
         frame_inscrito.pack(fill="x", pady=2)
@@ -330,3 +381,52 @@ class TelaInscricoes:
     def destruir(self):
         if self.frame:
             self.frame.destroy()
+   
+    def cadastrar_inscricao(self):
+      termo_busca = self.entry_busca_participante.get().strip()
+
+      if not termo_busca:
+          messagebox.showerror("Erro", "Digite o nome do participante para inscrevê-lo.")
+          return
+       
+      if not self.evento_selecionado:
+        messagebox.showerror("Erro", "Nenhum evento selecionado.")
+        return
+          
+      try: 
+          participante = asyncio.run(
+            self.inscricao_service.get_participante(termo_busca)
+            )  
+ 
+          if not participante:
+            messagebox.showerror("Erro", "Participante não encontrado.")
+            
+
+          participante_id = participante['participante_id']
+
+          evento_id = self.evento_selecionado
+            
+        
+          inscricao = asyncio.run(
+            self.inscricao_service.create_inscricao(
+                user_id=participante_id,
+                evento_id=evento_id,
+                data_inscricao=datetime.now()
+
+            )
+          )
+          self.adicionar_inscrito_lista(
+            participante["nome"],
+            f"ID {participante_id}",
+            datetime.now().strftime("%d/%m/%Y %H:%M")
+          )
+
+          messagebox.showinfo("Sucesso", "Inscrição realizada com sucesso!")
+
+      except Exception as e:
+          messagebox.showerror("Erro", f"Falha ao realizar cadastro: {e}")
+            
+          
+
+        
+        
