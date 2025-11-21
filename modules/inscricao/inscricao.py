@@ -44,17 +44,22 @@ class InscricaoService:
         await self.conectar()
 
         try:
-            participante = await self.db.participante.find_many(
-                where={
-                    'OR': [
-                        {'nome': {'contains': termo, 'mode': 'insensitive'}},
-                        {'email': {'contains': termo, 'mode': 'insensitive'}},
-                        {'cpf': {'contains': termo, 'mode': 'insensitive'}},
-                        {'curso': {'contains': termo, 'mode': 'insensitive'}},
-                        {'turma': {'contains': termo, 'mode': 'insensitive'}}
-                    ]
-                }
-            )
+            if termo == "":
+                # Se termo vazio, retornar todos
+                participante = await self.db.participante.find_many()
+            else:
+                # Buscar com contains (case-sensitive no SQLite)
+                participante = await self.db.participante.find_many(
+                    where={
+                        'OR': [
+                            {'nome': {'contains': termo}},
+                            {'email': {'contains': termo}},
+                            {'cpf': {'contains': termo}},
+                            {'curso': {'contains': termo}},
+                            {'turma': {'contains': termo}}
+                        ]
+                    }
+                )
 
             if not participante:
                 return None
@@ -63,6 +68,7 @@ class InscricaoService:
 
         except Exception as e:
             print("Erro ao buscar participante:", e)
+            return None
         
         finally:
             await self.db.disconnect()
@@ -71,19 +77,24 @@ class InscricaoService:
         await self.conectar()
 
         try:
-            eventos = await self.db.evento.find_many(
-                where={
-                    'OR': [
-                         {'nome': {'contains': termo, 'mode': 'insensitive'}},
-                         {'descricao': {'contains': termo, 'mode': 'insensitive'}},
-                         {'local': {'contains':termo, 'mode':'insensitive'}},
-                         {'status':{'contains':termo, 'mode':'insensitive'}}   
-                    ]
-                }
-            )
+            if termo == "":
+                # Se termo vazio, retornar todos os eventos
+                eventos = await self.db.evento.find_many()
+            else:
+                # Buscar com contains (case-sensitive no SQLite)
+                eventos = await self.db.evento.find_many(
+                    where={
+                        'OR': [
+                            {'nome': {'contains': termo}},
+                            {'descricao': {'contains': termo}},
+                            {'local': {'contains': termo}},
+                            {'status': {'contains': termo}}   
+                        ]
+                    }
+                )
+            
             if not eventos:
                 return None
-            
 
             return eventos
         
