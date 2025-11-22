@@ -9,7 +9,7 @@ from prisma import Prisma
 from telas.eventos import TelaEventos
 from telas.participantes import TelaParticipantes
 from telas.inscricoes import TelaInscricoes
-from telas.relatorios import TelaRelatorios
+from telas.certificados import TelaCertificados
 # from telas.configuracoes import TelaConfiguracoes
 
 # Importar utilitários
@@ -129,10 +129,10 @@ class App(ctk.CTk):
         )
         self.btn_inscricoes.grid(row=4, column=0, padx=15, pady=5, sticky="ew")
         
-        self.btn_relatorios = ctk.CTkButton(
+        self.btn_certificados = ctk.CTkButton(
             self.sidebar,
-            text="Relatórios",
-            command=self.mostrar_relatorios,
+            text="Certificados",
+            command=self.mostrar_certificados,
             fg_color="transparent",
             text_color="#1F2937",
             hover_color="#E5E7EB",
@@ -140,7 +140,7 @@ class App(ctk.CTk):
             height=40,
             font=ctk.CTkFont(size=14)
         )
-        self.btn_relatorios.grid(row=5, column=0, padx=15, pady=5, sticky="ew")
+        self.btn_certificados.grid(row=5, column=0, padx=15, pady=5, sticky="ew")
         
         # # Botões inferiores
         # self.btn_config = ctk.CTkButton(
@@ -176,7 +176,7 @@ class App(ctk.CTk):
             self.btn_eventos,
             self.btn_participantes,
             self.btn_inscricoes,
-            self.btn_relatorios
+            self.btn_certificados
         ]
         
         for btn in botoes:
@@ -214,10 +214,10 @@ class App(ctk.CTk):
         self.tela_atual = TelaInscricoes(self, self)
         self.tela_atual.criar()
     
-    def mostrar_relatorios(self):
+    def mostrar_certificados(self):
         self.limpar_tela_atual()
-        self.atualizar_botao_ativo(self.btn_relatorios)
-        self.tela_atual = TelaRelatorios(self, self)
+        self.atualizar_botao_ativo(self.btn_certificados)
+        self.tela_atual = TelaCertificados(self, self)
         self.tela_atual.criar()
     
     # def mostrar_config(self):
