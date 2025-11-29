@@ -172,7 +172,6 @@ class App(ctk.CTk):
     def atualizar_botao_ativo(self, botao_ativo):
         """Atualiza o visual do botão ativo no menu"""
         botoes = [
-            # self.btn_dashboard,
             self.btn_eventos,
             self.btn_participantes,
             self.btn_inscricoes,
